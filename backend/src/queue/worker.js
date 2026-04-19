@@ -14,7 +14,6 @@ const startWorker = async () => {
   workflowQueue.process(3, async (job) => {
     const { workflowId, executionId, triggerData } = job.data;
     logger.info(`[Worker] Processing job ${job.id} | execution: ${executionId}`);
-
     try {
       await WorkflowEngine.execute(workflowId, executionId, triggerData);
       logger.info(`[Worker] Job ${job.id} completed`);

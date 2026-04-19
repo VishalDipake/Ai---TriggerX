@@ -2,22 +2,25 @@ require("dotenv").config();
 const Bull = require("bull");
 const logger = require("../utils/logger");
 
-const redisOptions = {
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-};
-
-const workflowQueue = new Bull("workflow-execution", {
-  redis: process.env.REDIS_URL
-    ? { ...redisOptions, url: process.env.REDIS_URL }
-    : { ...redisOptions, host: "127.0.0.1", port: 6379 },
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: { type: "exponential", delay: 2000 },
-    removeOnComplete: 50,
-    removeOnFail: 100,
-  },
-});
+const workflowQueue = new Bull(
+  "workflow-execution",
+  process.env.REDIS_URL,
+  {
+    redis: {
+      tls: {
+        rejectUnauthorized: false,
+      },
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+    },
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: { type: "exponential", delay: 2000 },
+      removeOnComplete: 50,
+      removeOnFail: 100,
+    },
+  }
+);
 
 workflowQueue.on("error", (err) => {
   logger.error(`[Queue] Error: ${err.message}`);
